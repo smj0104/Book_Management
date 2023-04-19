@@ -40,15 +40,15 @@ const inputLabel = css`
     font-weight: 600;
 `;
 
-const forgotPassword = css`
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    margin-bottom: 45px;
-    width: 100%;
-    font-size: 12px;
-    font-weight: 600;
-`;
+// const forgotPassword = css`
+//     display: flex;
+//     justify-content: flex-end;
+//     align-items: center;
+//     margin-bottom: 45px;
+//     width: 100%;
+//     font-size: 12px;
+//     font-weight: 600;
+// `;
 
 const loginButton = css`
     margin: 10px 0px;
@@ -68,30 +68,6 @@ const loginButton = css`
     }
 `;
 
-const oauth2Container = css`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 20px;
-    width: 100%;
-`;
-
-const oauth2 = (provider) => css`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 0px 10px;
-    border: 3px solid ${provider === "google" ? "#0075ff" : provider === "naver" ? "#19ce60" : "#ffdc00"};
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    font-size: ${provider === "kakao" ? "30px" : "20px"};
-    cursor: pointer;
-    &:hover {
-        background-color: ${provider === "google" ? "#0075ff" : provider === "naver" ? "#19ce60" : "#ffdc00"};
-    }
-`;
-
 const singupMessage = css`
     margin-top: 20px;
     font-size: 14px;
@@ -104,15 +80,23 @@ const register = css`
     font-weight: 600;
 `;
 
+const errorMsg = css`
+    margin-left: 5px;
+    margin-bottom: 20px;
+    font-size: 12px;
+    color: red;
+`;
+
 const Register = () => {
     const [registerUser, setRegisterUser] = useState({email: "", password:"", name:""})
+    const [errorMessages, setErrorMessages] = useState({email: "", password: "", name: ""});
 
     const onChangeHandle = (e) => {
         const {name, value } = e.target;
         setRegisterUser({...registerUser, [name]: value})
     }
 
-    const registeSubmit = () => {
+    const registeSubmit = async() => {
         const data = {
             ...registerUser
         }
@@ -120,18 +104,24 @@ const Register = () => {
             headers: {
                 "Content-Type": "application/json"
             }
+        }               //await은 async함수 안에서만 사용가능하다
+        try {   
+            const response = await axios.post("http://localhost:8080/auth/signup", JSON.stringify(data), option); //Promise 사용
+            setErrorMessages({email: "", password: "", name: ""});
+            
+        } catch(error) {
+            setErrorMessages({email: "", password: "", name: "", ...error.response.data.errorData});
         }
-        axios.post("http://localhost:8080/auth/signup", JSON.stringify(data), option)
-        .then(response => {
-            console.log("성공");
-            console.log(response);
-        })
-        .catch(error => {
-            console.log("에러");
-            console.log(error.response.data.errorData);
-        });
+        // .then(response => {
+        //     setErrorMessages({email: "", password: "", name: ""});
+        //     console.log(response);
+        //     //return "test";  //then에서 받은 return은 무조건 promise
+        // })
+        // .catch(error => {
+        //     setErrorMessages({email: "", password: "", name: "", ...error.response.data.errorData}); //...그대로 복사해옴
+        // });
 
-        console.log("비동기 테스트"); //axios는 무조건 비동기       //동기 비동기 :동기 = 무조건 순서대로   비동기 = 빠른순으로 먼저 받음 
+       // console.log("비동기 테스트"); //axios는 무조건 비동기       //동기 비동기 :동기 = 무조건 순서대로   비동기 = 빠른순으로 먼저 받음 
     }
     return (
         <div css={container}>
@@ -144,14 +134,17 @@ const Register = () => {
                     <LoginInput type="email" placeholder="Type your email" onChange={onChangeHandle} name="email">
                         <FiUser />
                     </LoginInput>
+                    <div css={errorMsg}>{errorMessages.email}</div>
                     <label css={inputLabel}>password</label>
                     <LoginInput type="password" placeholder="Type your password" onChange={onChangeHandle} name="password">
                         <FiLock />
                     </LoginInput>
+                    <div css={errorMsg}>{errorMessages.password}</div>
                     <label css={inputLabel}>Name</label>
                     <LoginInput type="text" placeholder="Type your name" onChange={onChangeHandle} name="name">
                         <BiRename />
                     </LoginInput>
+                    <div css={errorMsg}>{errorMessages.name}</div>
                     
                     <button css={loginButton} onClick={registeSubmit}>REGISTER</button>
                 </div>
@@ -165,5 +158,6 @@ const Register = () => {
         </div>
     );
 };
-
+//Promise 안에 then(),catch()가 들어있다.
+//then() = resolve호출시 실행 reject호출시 실행
 export default Register;
