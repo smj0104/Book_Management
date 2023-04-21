@@ -4,29 +4,20 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { BrowserRouter } from 'react-router-dom';
-import { RecoilRoot, atom, selector } from 'recoil';
+import { RecoilRoot } from 'recoil';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
- export const authenticated = atom({
-  key: "authenticated",
-  default: false  
-})
+const queryClient = new QueryClient();
 
-
-export const authenticatedState = selector({
-  key: "authenticatedState",
-  get:({get}) => {
-    const auth = get(authenticated);
-    return auth;
-  }
-})
-
-const root = ReactDOM.createRoot(document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById('root'));  //처음 로드시 루트에서 렌더가 일어남 하위의 컴포넌트들이 컴파일된다
 root.render(
   <React.StrictMode>
     <RecoilRoot>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </QueryClientProvider>
     </RecoilRoot>
   </React.StrictMode>
 );

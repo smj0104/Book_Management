@@ -7,8 +7,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { BsGoogle } from 'react-icons/bs'
 import { SiNaver, SiKakao } from 'react-icons/si'
 import axios from 'axios';
-import { authenticated } from '../../index';
+import { refreshState } from './../../atoms/Auth/AuthAtoms';
 import { useRecoilState } from 'recoil';
+
 
 const container = css`
     display: flex;
@@ -117,7 +118,8 @@ const errorMsg = css`
 const Login = () => {
     const [loginUser, setLoginUser] =  useState({email: "", password:""});
     const [errorMessages, setErrorMessages ] = useState({email:"", password:""});
-    const [ auth, setAuth ] = useRecoilState(authenticated);
+    const [ refresh, setRefresh ] = useRecoilState(refreshState);
+ 
     const navigate = useNavigate();
 
     const handleChange = (e) => {
@@ -136,7 +138,7 @@ const Login = () => {
             setErrorMessages({email: "", password: "",});
             const accessToken = response.data.grantType + " " + response.data.accessToken;  //앞에 bearer 띄우고 들어가게된다
             localStorage.setItem("accessToken", accessToken);
-            setAuth(true);
+            setRefresh(false);
             navigate("/");
         } catch(error) {
             setErrorMessages({email: "", password: "", ...error.response.data.errorData});
