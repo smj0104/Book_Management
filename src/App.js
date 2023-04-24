@@ -23,10 +23,26 @@ import AuthRouteReactQuery from "./components/Routes/AuthRoute/AuthRouteReactQue
  * 
  * Recoil 동기처리
  * ReactQuery, axios 비동기처리   axios = promise를 리턴 promise안에서는 순차적으로 동작(비동기처리를 순차적으로) promise(콜백)
+ * usequery = 전역상태 관리  recoil과 reactquery 두가지로 나뉜다
+ * 
  * 
  * await이 있으면 갔다가 오고 처리
  * 
  * **상태가 변했을때 재렌더링이 일어난다**
+ * 
+ * 0424
+ * 사용자
+ * 도서 조회 (검색, 페이징)
+ * 도서 대여
+ * 도서 반납
+ * 도서 좋아요
+ * 
+ * 관리자 (CRUD구현)
+ * 도서 등록
+ * 도서 조회(검색, 번호 페이징)
+ * 도서 수정
+ * 도서 삭제
+ *
  */
 
 function App() {
@@ -37,7 +53,8 @@ function App() {
       <Routes>
         <Route exact path="/login" element={ <AuthRouteReactQuery path ="/login" element={<Login />}/>} />
         <Route path="/register" element={<AuthRouteReactQuery path ="/register" element={<Register />}/>} />
-        <Route path="/" element={<AuthRouteReactQuery path ="/" element={<Main />}/>  //강제로 로그인 페이지 302error
+        <Route path="/" element={<AuthRouteReactQuery path ="/" element={<Main />}/>} /> 
+        <Route path="/admin/search" element={ <AuthRouteReactQuery path ="/" element={<Main />}/>
         } />
    
 {/* 
