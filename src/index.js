@@ -11,7 +11,7 @@ const queryClient = new QueryClient();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));  //처음 로드시 루트에서 렌더가 일어남 하위의 컴포넌트들이 컴파일된다
 root.render(
-  <React.StrictMode>
+ // <React.StrictMode>
     <RecoilRoot>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
@@ -19,7 +19,7 @@ root.render(
         </BrowserRouter>
       </QueryClientProvider>
     </RecoilRoot>
-  </React.StrictMode>
+  //</React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function
