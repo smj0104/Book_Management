@@ -7,6 +7,7 @@ import Register from "./pages/Register/Register";
 // import PromiseStudy from "./study/PromiseStudy";
 import Main from "./pages/Main/Main";
 import AuthRouteReactQuery from "./components/Routes/AuthRoute/AuthRouteReactQuery";
+import BookDetail from "./pages/BookDetail/BookDetail";
 
 /**
  * 인증절차
@@ -23,7 +24,8 @@ import AuthRouteReactQuery from "./components/Routes/AuthRoute/AuthRouteReactQue
  * 
  * Recoil 동기처리
  * ReactQuery, axios 비동기처리   axios = promise를 리턴 promise안에서는 순차적으로 동작(비동기처리를 순차적으로) promise(콜백)
- * usequery = 전역상태 관리  recoil과 reactquery 두가지로 나뉜다
+ * usequery = 전역상태 관리  recoil과 reactquery 두가지로 나뉜다 (비동기)
+ * 
  * 
  * 
  * await이 있으면 갔다가 오고 처리
@@ -54,6 +56,7 @@ function App() {
         <Route exact path="/login" element={ <AuthRouteReactQuery path ="/login" element={<Login />}/>} />
         <Route path="/register" element={<AuthRouteReactQuery path ="/register" element={<Register />}/>} />
         <Route path="/" element={<AuthRouteReactQuery path ="/" element={<Main />}/>} /> 
+        <Route path="/book/:bookId" element={<AuthRouteReactQuery path ="/book" element={<BookDetail />}/>} /> 
         <Route path="/admin/search" element={ <AuthRouteReactQuery path ="/" element={<Main />}/>
         } />
    
