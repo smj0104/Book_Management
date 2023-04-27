@@ -3,8 +3,10 @@ import { css } from '@emotion/react';
 import React from 'react';
 import SideBar from '../../components/Sidebar/SideBar';
 import { useParams } from 'react-router-dom';
-import { useQuery } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
 import axios from 'axios';
+import { QueryClient } from 'react-query';
+import RentalList from '../../components/UI/BookDetail/RentalList/RentalList';
 
 /**
  *  콜백: 비동기 처리 후에 함수 실행을 해야하는 경우 사용  //비동기 안에서 동기적으로 함수를 실행시킬때
@@ -51,6 +53,8 @@ const BookDetail = () => {      //중요 안보고 적어보기
 
     // if(!getBook.isLoading)
     const { bookId } = useParams();  //useParams app.js path="/book/bookIds"
+    const QueryClient = useQueryClient();
+    //console.log(QueryClient.getQueryData("principal"));
 
     const getBook = useQuery(["getBook"], async () => {     //const getBook = useQuery(['캐쉬키'], 함수(promise도 가능), 옵션)
         const option = {
@@ -72,7 +76,53 @@ const BookDetail = () => {      //중요 안보고 적어보기
         return response;
     });
 
-    if(getBook.isLoading) { //요청이 가있는동안
+    const getLikeStatus = useQuery(["getLikeStatus"], async () => {
+        const option = {
+            params: {
+                userId: QueryClient.getQueryData("principal").data.userId
+            },
+            headers: {
+                Authorization: localStorage.getItem("accessToken")
+            }
+        }
+        const response = await axios.get(`http://localhost:8080/book/${bookId}/like/status`, option);
+        return response;
+    });
+
+    const setLike = useMutation( async() => {
+        const option = {
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: localStorage.getItem("accessToken")
+            }
+        }
+        return await axios.post(`http://localhost:8080/book/${bookId}/like`, JSON.stringify(
+         {userId: QueryClient.getQueryData("principal").data.userId }), option);
+    }, {
+        onSuccess: () => {
+            QueryClient.invalidateQueries("getLikeCount");      // 캐싱 지워줌
+            QueryClient.invalidateQueries("getLikeStatus");
+        }
+        
+    });      //get을 제외한 모든 요청은 mutation사용으로 처리 (reactquery에서)
+
+    const disLike = useMutation( async() => {
+        const option = {
+            params: {
+                userId: QueryClient.getQueryData("principal").data.userId
+            },
+            headers: {
+                Authorization: localStorage.getItem("accessToken")
+            }
+        }
+        return await axios.delete(`http://localhost:8080/book/${bookId}/like`, option);
+    }, {
+        onSuccess: () => { 
+        QueryClient.invalidateQueries("getLikeCount");      // 캐싱 지워줌
+        QueryClient.invalidateQueries("getLikeStatus");
+        }
+    });      
+    if(getBook.isLoading) { 
         return <div>불러오는 중....</div>
     }
 
@@ -89,10 +139,14 @@ const BookDetail = () => {      //중요 안보고 적어보기
                     <img src={getBook.data.data.coverImgUrl} alt={getBook.data.data.categoryName}/>
                 </div>
                 <div>
-
+                    <RentalList bookId={bookId}/>
                 </div>
                 <div>
-                    <button>추천</button>
+                    {getLikeStatus.isLoading 
+                        ? ""
+                        : getLikeStatus.data.data === 0 
+                            ? (<button onClick={() => {setLike.mutate()}}>추천하기 </button>)
+                            : (<button onClick={() => {disLike.mutate()}}>추천취소</button>)}
                 </div>
             </main>
         </div>
