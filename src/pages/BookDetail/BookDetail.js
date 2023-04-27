@@ -53,7 +53,7 @@ const BookDetail = () => {      //중요 안보고 적어보기
 
     // if(!getBook.isLoading)
     const { bookId } = useParams();  //useParams app.js path="/book/bookIds"
-    const QueryClient = useQueryClient();
+    const queryClient = useQueryClient();
     //console.log(QueryClient.getQueryData("principal"));
 
     const getBook = useQuery(["getBook"], async () => {     //const getBook = useQuery(['캐쉬키'], 함수(promise도 가능), 옵션)
@@ -79,7 +79,7 @@ const BookDetail = () => {      //중요 안보고 적어보기
     const getLikeStatus = useQuery(["getLikeStatus"], async () => {
         const option = {
             params: {
-                userId: QueryClient.getQueryData("principal").data.userId
+                userId: queryClient.getQueryData("principal").data.userId
             },
             headers: {
                 Authorization: localStorage.getItem("accessToken")
@@ -97,11 +97,11 @@ const BookDetail = () => {      //중요 안보고 적어보기
             }
         }
         return await axios.post(`http://localhost:8080/book/${bookId}/like`, JSON.stringify(
-         {userId: QueryClient.getQueryData("principal").data.userId }), option);
+         {userId: queryClient.getQueryData("principal").data.userId }), option);
     }, {
         onSuccess: () => {
-            QueryClient.invalidateQueries("getLikeCount");      // 캐싱 지워줌
-            QueryClient.invalidateQueries("getLikeStatus");
+            queryClient.invalidateQueries("getLikeCount");      // 캐싱 지워줌
+            queryClient.invalidateQueries("getLikeStatus");
         }
         
     });      //get을 제외한 모든 요청은 mutation사용으로 처리 (reactquery에서)
@@ -109,7 +109,7 @@ const BookDetail = () => {      //중요 안보고 적어보기
     const disLike = useMutation( async() => {
         const option = {
             params: {
-                userId: QueryClient.getQueryData("principal").data.userId
+                userId: queryClient.getQueryData("principal").data.userId
             },
             headers: {
                 Authorization: localStorage.getItem("accessToken")
@@ -118,8 +118,8 @@ const BookDetail = () => {      //중요 안보고 적어보기
         return await axios.delete(`http://localhost:8080/book/${bookId}/like`, option);
     }, {
         onSuccess: () => { 
-        QueryClient.invalidateQueries("getLikeCount");      // 캐싱 지워줌
-        QueryClient.invalidateQueries("getLikeStatus");
+            queryClient.invalidateQueries("getLikeCount");      // 캐싱 지워줌
+            queryClient.invalidateQueries("getLikeStatus");
         }
     });      
     if(getBook.isLoading) { 
