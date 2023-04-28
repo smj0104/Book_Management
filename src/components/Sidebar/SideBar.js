@@ -113,7 +113,6 @@ const SideBar = () => {
     const logoutClickHandle = () => {
         if(window.confirm("로그아웃 하시겠습니까?")){
             localStorage.removeItem("accessToken");
-            queryClient.invalidateQueries("principal");
         }
     }
     if(queryClient.getQueryState("principal").status === "loading") {  //데이터를 제대로 들고오며 success로 바뀐다
@@ -121,7 +120,7 @@ const SideBar = () => {
     }
 
     const principalData = queryClient.getQueryData("principal").data;
-    const roles = principalData.authorities.split(",");
+
 
     //  substr은 갯수 substring이랑은 다르다.0번째 인덱스부터 한글자 잘라라 (0, 1)
     return (
@@ -140,7 +139,7 @@ const SideBar = () => {
                 <ListButton title="Dashboard"><BiHome /></ListButton>
                 <ListButton title="Likes"><BiLike /></ListButton>
                 <ListButton title="Rental"><BiListUl /></ListButton>
-                {roles.includes("ROLE_ADMIN") ? (<ListButton title="RegisterBookList"><BiListUl /></ListButton>) : ""}
+                
 
             </main>
             <footer css={footer}>
