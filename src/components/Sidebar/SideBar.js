@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { GrFormClose } from 'react-icons/gr';
 import ListButton from './ListButton/ListButton';
 import { BiHome, BiLike, BiListUl, BiLogOut } from 'react-icons/bi';
-import { useQuery } from 'react-query';
+import { useQuery, useQueryClient } from 'react-query';
 import axios from 'axios';
 
 const sidebar = (isOpen) => css`
@@ -98,15 +98,7 @@ const footer = css`
 
 const SideBar = () => {
     const [ isOpen, setIsOpen ] = useState(false);
-    const { data, isLoading } = useQuery(["principal"], async () => {  //async 확인    
-        const accessToken = localStorage.getItem("accessToken")
-        const response = await axios.get("http://localhost:8080/auth/principal",        //404는 주소문제
-         {params: {accessToken}}, 
-         {
-            enabled: accessToken        //enabled = 갔다가 오는 상황에 사용
-         });
-        return response;  //promise를 통해 data를 받아옴
-    });
+    const queryClient = useQueryClient();
 
     const sidebarOpenclickHandle = () => {  //캡쳐링?
         if(!isOpen){
@@ -121,24 +113,26 @@ const SideBar = () => {
     const logoutClickHandle = () => {
         if(window.confirm("로그아웃 하시겠습니까?")){
             localStorage.removeItem("accessToken");
+            queryClient.invalidateQueries("principal");
         }
     }
-
-    if(isLoading) {
-        return <>로딩중.....</>
+    if(queryClient.getQueryState("principal").status === "loading") {  //데이터를 제대로 들고오며 success로 바뀐다
+        return (<div>로딩</div>)
     }
 
+    const principalData = queryClient.getQueryData("principal").data;
+    const roles = principalData.authorities.split(",");
 
-    if(!isLoading)      //로딩이 다 끝나고나면 뿌린다           substr은 갯수 substring이랑은 다르다.0번째 인덱스부터 한글자 잘라라 (0, 1)
+    //  substr은 갯수 substring이랑은 다르다.0번째 인덱스부터 한글자 잘라라 (0, 1)
     return (
         <div css={sidebar(isOpen)} onClick={sidebarOpenclickHandle}> 
             <header css={header}>
                 <div css={userIcon}>        
-                {data.data.name.substr(0, 1)}      
+                    {principalData.name.substr(0, 1)}      
                 </div>
                 <div css={userInfo}>    
-                    <h1 css={userName}>{data.data.name}</h1>
-                    <p css={userEmail}>{data.data.email}</p>
+                    <h1 css={userName}>{principalData.name}</h1>
+                    <p css={userEmail}>{principalData.email}</p>
                 </div>
                 <div css={closeButton} onClick={sidebarCloseclickHandle}><GrFormClose /></div>
             </header>
@@ -146,6 +140,8 @@ const SideBar = () => {
                 <ListButton title="Dashboard"><BiHome /></ListButton>
                 <ListButton title="Likes"><BiLike /></ListButton>
                 <ListButton title="Rental"><BiListUl /></ListButton>
+                {roles.includes("ROLE_ADMIN") ? (<ListButton title="RegisterBookList"><BiListUl /></ListButton>) : ""}
+
             </main>
             <footer css={footer}>
                 <ListButton title="Logout" onClick={logoutClickHandle}><BiLogOut /></ListButton>  
